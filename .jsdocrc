@@ -1,0 +1,20 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc","closure"]
+  },
+  "source": {
+    "include": [ "src" ],
+    "includePattern": ".+\\.(j|t)s(x)?$",
+    "exclude": [],
+  },
+  "opts": {
+    "destination": "./doc/",
+    "readme": "./README.md" // 文档首页展示内容
+  },
+  "plugins": [],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  }
+}

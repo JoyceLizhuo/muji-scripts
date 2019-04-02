@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "es2019",
+    "sourceMap": true,
+    "jsx": "react",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["node_modules/@types"],
+    "types": [
+      "classnames",
+      "glob",
+      "history",
+      "node",
+      "prop-types",
+      "react",
+      "react-dom",
+      "react-redux",
+      "react-router",
+      "react-router-dom",
+      "redux-actions",
+      "styled-components",
+      "uuid",
+      "jest"
+    ]
+  },
+  "exclude": ["node_modules"]
+}
