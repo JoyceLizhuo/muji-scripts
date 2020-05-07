@@ -26,6 +26,11 @@ import {
 } from 'rxjs/operators'
 import styled, { StyleSheetManager } from 'styled-components'
 import BodyTip from '../components/BodyTip'
+import { greet } from '../wasm/wasmm/wasmm'
+
+window.foo = (args) => {
+  console.info('>>>>>> foo: ', args) // wyh-todo
+}
 
 export default class Rxjs extends React.Component<{}, {}> {
   constructor(props: {}) {
@@ -33,9 +38,12 @@ export default class Rxjs extends React.Component<{}, {}> {
     this.state = {}
   }
 
-  static getDerivedStateFromProps() {
-    console.info('getDerivedStateFromProps')
-    return {}
+  componentDidMount() {
+    greet({
+      foo: 123,
+      bar: 'asdf',
+      baz: [function inBaz() {}],
+    })
   }
 
   public render() {

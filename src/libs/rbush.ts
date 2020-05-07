@@ -29,6 +29,7 @@ export class RBush {
     this.clear()
   }
 
+  // ok
   clear() {
     this.data = {
       children: [],
@@ -39,10 +40,12 @@ export class RBush {
     return this
   }
 
+  // ok
   all() {
     return this._all(this.data, [])
   }
 
+  // ok
   search(bbox: BBoxType): BBoxArray {
     let node = this.data
     const result: BBoxArray = []
@@ -70,7 +73,7 @@ export class RBush {
           }
         }
       }
-      node = nodesToSearch.pop()
+      node = nodesToSearch.pop() as Tree
     }
     return result
   }
@@ -107,6 +110,7 @@ export class RBush {
     return this
   }
 
+  // ok
   toBBox<T>(item: T): T {
     return item
   }
@@ -125,21 +129,21 @@ export class RBush {
     if (!item) {
       return this
     }
-    let node: Tree = this.data
+    let node: Tree | null = this.data
     const bbox: BBoxType = this.toBBox(item)
     const path: TreeArray = []
     const indexes: Array<number> = []
-    let i: number
-    let parent: Tree
+    let i: number | null = null
+    let parent: Tree | null = null
     let goingUp = false
 
     // depth-first iterative tree traversal
     while (node || path.length) {
       if (!node) {
         // go up
-        node = path.pop()
+        node = path.pop() as Tree
         parent = path[path.length - 1]
-        i = indexes.pop()
+        i = indexes.pop() as number
         goingUp = true
       }
       if (node.leaf) {
@@ -156,14 +160,14 @@ export class RBush {
       if (!goingUp && !node.leaf && this._intersects(bbox, node.bbox)) {
         // go down
         path.push(node)
-        indexes.push(i)
+        indexes.push(i as number)
         i = 0
         parent = node
         node = node.children[0] as Tree
       } else if (parent) {
         // go right
-        i++
-        node = parent.children[i] as Tree
+        ;(i as number)++
+        node = parent.children[i as number] as Tree
         goingUp = false
       } else {
         // nothing found
@@ -190,15 +194,16 @@ export class RBush {
     }
   }
 
+  // ok
   _all(node: Tree, result: BBoxArray): BBoxArray {
     const nodesToSearch: TreeArray = []
     while (node) {
       if (node.leaf) {
-        result.push.apply(result, node.children)
+        result.push(...(node.children as BBoxArray))
       } else {
-        nodesToSearch.push.apply(nodesToSearch, node.children)
+        nodesToSearch.push(...(node.children as TreeArray))
       }
-      node = nodesToSearch.pop()
+      node = nodesToSearch.pop() as Tree
     }
     return result
   }
@@ -230,7 +235,7 @@ export class RBush {
     // TODO eliminate recursion?
     node = {
       children: [],
-      height,
+      height: height as number,
       bbox: this._empty(),
       leaf: false,
     }
@@ -246,7 +251,7 @@ export class RBush {
         const childNode = this._build(
           slice.slice(j, j + N2),
           level + 1,
-          height - 1,
+          (height as number) - 1,
         )
         node.children.push(childNode)
       }
@@ -255,10 +260,12 @@ export class RBush {
     return node
   }
 
+  // ok
   _intersects(a: BBoxType, b: BBoxType): boolean {
     return b[0] <= a[2] && b[1] <= a[3] && b[2] >= a[0] && b[3] >= a[1]
   }
 
+  // ok
   _contains(a: BBoxType, b: BBoxType): boolean {
     return a[0] <= b[0] && a[1] <= b[1] && b[2] <= a[2] && b[3] <= a[3]
   }
@@ -268,24 +275,18 @@ export class RBush {
    * @param item - 要插入的 bbox 或者 tree
    * @param level - 从哪个层级开始寻找插入点
    * @param [isNode] - item 是否是 tree
-   * @param [root] - 从哪个节点开始插入
    */
-  _insert(item: ChildType, level: number, isNode?: boolean, root?: Tree) {
+  _insert(item: ChildType, level: number, isNode?: boolean) {
     const bbox = isNode ? (item as Tree).bbox : this.toBBox(item as BBoxType)
     const insertPath: TreeArray = []
 
     // find the best node for accommodating the item, saving all nodes along the path too
-    const node: Tree = this._chooseSubtree(
-      bbox,
-      root || this.data,
-      level,
-      insertPath,
-    )
+    const node: Tree = this._chooseSubtree(bbox, this.data, level, insertPath)
     let splitOccured: boolean
 
     // put the item into the node
     node.children.push(item)
-    this._extend(node.bbox, bbox)
+    node.bbox = this._extend(node.bbox, bbox)
 
     // split on node overflow; propagate upwards if necessary
     do {
@@ -325,6 +326,7 @@ export class RBush {
     }
   }
 
+  // ok
   _splitRoot(node: Tree, newNode: Tree) {
     // split root node
     this.data = {
@@ -346,7 +348,7 @@ export class RBush {
     let area: number
     let minOverlap: number
     let minArea: number
-    let index: number
+    let index: number | null = null
     minOverlap = minArea = Infinity
     for (i = m; i <= M - m; i++) {
       bbox1 = this._distBBox(node, 0, i)
@@ -367,14 +369,15 @@ export class RBush {
         }
       }
     }
-    return index
+    return index as number
   }
 
+  // ok
   _area(a: BBoxType) {
     return (a[2] - a[0]) * (a[3] - a[1])
   }
 
-  // a、b 两个 bbox 相交部分的面积
+  // ok a、b 两个 bbox 相交部分的面积
   _intersectionArea(a: BBoxType, b: BBoxType) {
     const minX = Math.max(a[0], b[0])
     const minY = Math.max(a[1], b[1])
@@ -406,15 +409,15 @@ export class RBush {
     compare: CompareMinFunc<BBoxType> | CompareMinFunc<Tree>,
   ) {
     node.children.sort(compare)
-    const leftBBox = this._distBBox(node, 0, m)
-    const rightBBox = this._distBBox(node, M - m, M)
+    let leftBBox = this._distBBox(node, 0, m)
+    let rightBBox = this._distBBox(node, M - m, M)
     let margin = this._margin(leftBBox) + this._margin(rightBBox)
     let i: number
     let child: ChildType
 
     for (i = m; i < M - m; i++) {
       child = node.children[i]
-      this._extend(
+      leftBBox = this._extend(
         leftBBox,
         node.leaf ? this.toBBox(child as BBoxType) : (child as Tree).bbox,
       )
@@ -423,7 +426,7 @@ export class RBush {
 
     for (i = M - m - 1; i >= 0; i--) {
       child = node.children[i]
-      this._extend(
+      rightBBox = this._extend(
         rightBBox,
         node.leaf ? this.toBBox(child as BBoxType) : (child as Tree).bbox,
       )
@@ -433,16 +436,17 @@ export class RBush {
     return margin
   }
 
+  // ok
   _margin(a: BBoxType) {
     return a[2] - a[0] + (a[3] - a[1])
   }
 
-  // min bounding rectangle of node children from k to p-1
+  // ok min bounding rectangle of node children from k to p-1
   _distBBox(node: Tree, k: number, p: number) {
-    const bbox = this._empty()
+    let bbox = this._empty()
     for (let i = k, child: ChildType; i < p; i++) {
       child = node.children[i]
-      this._extend(
+      bbox = this._extend(
         bbox,
         node.leaf ? this.toBBox(child as BBoxType) : (child as Tree).bbox,
       )
@@ -450,23 +454,27 @@ export class RBush {
     return bbox
   }
 
+  // ok
   compareMinX: CompareMinFunc<BBoxType> = (a, b) => {
     return a[0] - b[0]
   }
 
+  // ok
   compareMinY: CompareMinFunc<BBoxType> = (a: BBoxType, b: BBoxType) => {
     return a[1] - b[1]
   }
 
+  // ok
   _compareNodeMinX: CompareMinFunc<Tree> = (a, b) => {
     return a.bbox[0] - b.bbox[0]
   }
 
+  // ok
   _compareNodeMinY: CompareMinFunc<Tree> = (a, b) => {
     return a.bbox[1] - b.bbox[1]
   }
 
-  // calculate node's bbox from bboxes of its children
+  // ok calculate node's bbox from bboxes of its children
   _calcBBox(node: Tree) {
     node.bbox = this._empty()
     for (
@@ -475,7 +483,7 @@ export class RBush {
       i++
     ) {
       child = node.children[i]
-      this._extend(
+      node.bbox = this._extend(
         node.bbox,
         node.leaf ? this.toBBox(child as BBoxType) : (child as Tree).bbox,
       )
@@ -496,15 +504,14 @@ export class RBush {
     level: number,
     path: TreeArray,
   ): Tree {
-    let targetNode: Tree
-    let minArea: number
-    let minEnlargement: number
     while (true) {
       path.push(node)
       if (node.leaf || path.length - 1 === level) {
         break
       }
-      minArea = minEnlargement = Infinity
+      let minArea = Infinity
+      let minEnlargement = Infinity
+      let targetNode: Tree | null = null
       for (const d of node.children) {
         const child = d as Tree
         const area = this._area(child.bbox)
@@ -513,21 +520,20 @@ export class RBush {
         // choose entry with the least area enlargement
         if (enlargement < minEnlargement) {
           minEnlargement = enlargement
-          minArea = area < minArea ? area : minArea
+          minArea = Math.min(area, minArea)
           targetNode = child
-        } else if (enlargement === minEnlargement) {
+        } else if (enlargement === minEnlargement && area < minArea) {
           // otherwise choose one with the smallest area
-          if (area < minArea) {
-            minArea = area
-            targetNode = child
-          }
+          minArea = area
+          targetNode = child
         }
       }
-      node = targetNode
+      node = targetNode as Tree
     }
     return node
   }
 
+  // ok
   _enlargedArea(a: BBoxType, b: BBoxType) {
     return (
       (Math.max(b[2], a[2]) - Math.min(b[0], a[0])) *
@@ -535,21 +541,24 @@ export class RBush {
     )
   }
 
+  // ok adjust bboxes along the given tree path
   _adjustParentBBoxes(bbox: BBoxType, path: Array<Tree>, level: number) {
-    // adjust bboxes along the given tree path
     for (let i = level; i >= 0; i--) {
-      this._extend(path[i].bbox, bbox)
+      path[i].bbox = this._extend([...path[i].bbox] as BBoxType, bbox)
     }
   }
 
+  // ok
   _extend(a: BBoxType, b: BBoxType): BBoxType {
-    a[0] = Math.min(a[0], b[0])
-    a[1] = Math.min(a[1], b[1])
-    a[2] = Math.max(a[2], b[2])
-    a[3] = Math.max(a[3], b[3])
-    return a
+    return [
+      Math.min(a[0], b[0]),
+      Math.min(a[1], b[1]),
+      Math.max(a[2], b[2]),
+      Math.max(a[3], b[3]),
+    ]
   }
 
+  // ok
   _empty(): BBoxType {
     return [Infinity, Infinity, -Infinity, -Infinity]
   }
