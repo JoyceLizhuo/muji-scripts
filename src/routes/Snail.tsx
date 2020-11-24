@@ -4,7 +4,7 @@ import styled, { css } from 'styled-components'
 import { v1 as uuid } from 'uuid'
 
 // <editor-fold desc="工具函数">
-const submitOneTask = () => {
+const submitOneTask = (): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve()
@@ -12,7 +12,7 @@ const submitOneTask = () => {
   })
 }
 
-const waitForTaskHide = () => {
+const waitForTaskHide = (): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve()

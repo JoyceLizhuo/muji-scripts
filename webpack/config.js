@@ -144,7 +144,7 @@ module.exports = {
 
   statsConfig,
 
-  sourceMapForDev: 'cheap-module-eval-source-map', // 'cheap-module-eval-source-map'
+  sourceMapForDev: 'cheap-source-map', // 'cheap-module-eval-source-map'
 
   logStats(stats) {
     const {

@@ -11,7 +11,7 @@ module.exports = {
   },
   output: {
     path: paths.libPath,
-    filename: isProd ? '[name].[hash].js' : '[name].js',
+    filename: isProd ? '[name].[fullhash].js' : '[name].js',
     library: '[name]',
     publicPath: isProd ? paths.publicPathForProd : paths.publicPathFordev,
   },

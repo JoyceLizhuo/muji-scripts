@@ -4,9 +4,11 @@ const createStyledComponentsTransformer = require('typescript-plugin-styled-comp
 const tsImportPluginFactory = require('ts-import-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin')
+// const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin')
+const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin')
 const webpack = require('webpack')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const path = require('path')
 
 module.exports = () => {
   const isProd = process.env.NODE_ENV === 'production'
@@ -45,17 +47,23 @@ module.exports = () => {
         {
           loader: 'postcss-loader',
           options: {
+            postcssOptions: {
+              // ident: 'postcss',
+              plugins: [
+                  ['postcss-preset-env', { features: {  'nesting-rules': true,}}],
+                  ['postcss-apply']
+              ]
+              // plugins: () => [
+              //   // 支持嵌套写法
+              //   require('postcss-preset-env')({
+              //     features: {
+              //       'nesting-rules': true,
+              //     },
+              //   }),
+              //   require('postcss-apply'),
+              // ],
+            },
             sourceMap: true,
-            ident: 'postcss',
-            plugins: () => [
-              // 支持嵌套写法
-              require('postcss-preset-env')({
-                features: {
-                  'nesting-rules': true,
-                },
-              }),
-              require('postcss-apply'),
-            ],
           },
         },
       ],
@@ -83,8 +91,8 @@ module.exports = () => {
     },
     output: {
       path: paths.output,
-      filename: isProd ? 'index.[hash].js' : 'index.js',
-      chunkFilename: isProd ? '[name].[hash].js' : '[name].js',
+      filename: isProd ? 'index.[fullhash].js' : 'index.js',
+      chunkFilename: isProd ? '[name].[fullhash].js' : '[name].js',
       publicPath: isProd ? paths.publicPathForProd : paths.publicPathFordev,
     },
     module: {
@@ -100,19 +108,28 @@ module.exports = () => {
         title: isProd ? 'hello' : 'hello',
         favicon: paths.faviconPath,
       }),
-      new AddAssetHtmlPlugin([
-        {
-          filepath: isProd
-            ? paths.libPath + '/lib.*.js'
-            : paths.libPath + '/lib.js',
-          includeSourcemap: isProd,
-        },
-      ]),
+      new HtmlWebpackTagsPlugin({
+        scripts: [{
+          path: isProd ? '' : '../dist',
+          glob: isProd ? 'lib.*.js' : 'lib.js',
+          globPath: path.join(__dirname, '../dist'),
+          globFlatten: isProd,
+        }],
+        append: false
+      }),
+      // new AddAssetHtmlPlugin([
+      //   {
+      //     filepath: isProd
+      //       ? paths.libPath + '/lib.*.js'
+      //       : paths.libPath + '/lib.js',
+      //     includeSourcemap: isProd,
+      //   },
+      // ]),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-        filename: isProd ? 'index.[hash].css' : 'index.css',
-        chunkFilename: isProd ? '[name].[hash].css' : '[name].css',
+        filename: isProd ? 'index.[fullhash].css' : 'index.css',
+        chunkFilename: isProd ? '[name].[fullhash].css' : '[name].css',
       }),
       new ForkTsCheckerWebpackPlugin(),
     ],
