@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
   "scripts": {
-    "dev": "node scripts/dev",
-    "prod": "node scripts/prod",
+    "dev": "TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\"  ts-node -r tsconfig-paths/register scripts/dev.ts",
+    "prod": "TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\"  ts-node -r tsconfig-paths/register scripts/prod.ts",
     "doc": "rm -rf doc && jsdoc --configure .jsdocrc -r",
-    "prodServerLocal": "node scripts/prodserverForLocalTest",
+    "prodServerLocal": "TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\"  ts-node -r tsconfig-paths/register scripts/prodServerForLocalTest.ts",
     "mock": "node src/api/mock/mockServer",
     "mock2": "node src/api/mock/mockServer --v=2",
     "mockKoa": "node src/api/mock/mockServerKOA.js",
@@ -90,6 +90,11 @@
     "url": "http://lizhuowang@gitlab.yxapp.in/rulengine/rulengine-manage-web.git"
   },
   "devDependencies": {
-    "chalk": "^4.1.0"
+    "@types/mini-css-extract-plugin": "^1.2.1",
+    "@types/rimraf": "^3.0.0",
+    "@types/webpack-dev-server": "^3.11.1",
+    "chalk": "^4.1.0",
+    "ts-node": "^9.0.0",
+    "tsconfig-paths": "^3.9.0"
   }
 }

@@ -1,14 +1,14 @@
-process.env.BABEL_ENV = 'development'
-process.env.NODE_ENV = 'development'
-const fs = require('fs')
-const { paths, logStats, statsConfig } = require('../webpack/config')
-const chalk = require('chalk')
-const webpack = require('webpack')
-const WebpackDevServer = require('webpack-dev-server')
-const dllConfig = require('../webpack/webpack.config.dll')
+import fs from 'fs'
+import webpack from 'webpack'
+import chalk from 'chalk'
+import WebpackDevServer from 'webpack-dev-server'
+import getDllConfig from './webpack.config.dll'
+import { paths, statsConfig, logStats } from './config'
+
 const HOST = '0.0.0.0'
 const PORT = 3000
-const options = {
+const dllConfig = getDllConfig()
+const options: WebpackDevServer.Configuration = {
   stats: statsConfig,
 
   // Enable hot reloading server. It will provide /sockjs-node/ endpoint
@@ -31,7 +31,7 @@ const options = {
   historyApiFallback: {
     // Paths with dots should still use the history fallback.
     // See https://github.com/facebookincubator/create-react-app/issues/387.
-    disableDotRule: true
+    disableDotRule: true,
   },
 
   // Silence WebpackDevServer's own logs since they're generally not useful.
@@ -41,30 +41,29 @@ const options = {
   proxy: {
     '/mock/': {
       target: 'http://localhost:8082',
-    }
-  }
+    },
+  },
 }
 
-function startDevServer() {
+async function startDevServer() {
   console.info('starting dev server')
-  const webpackConfig = require('../webpack/webpack.config')
-  const compiler = webpack(webpackConfig())
+  const getWebpackConfig = await import('./webpack.config')
+  const config = getWebpackConfig.default()
+  const compiler = webpack(config)
   const devServer = new WebpackDevServer(compiler, options)
   devServer.listen(PORT, HOST, (err) => {
-    if(err) {
+    if (err) {
       console.error('error happened: ', err)
     } else {
-      console.info(chalk.blue(`development server listening at http://localhost:${PORT}`))
+      console.info(
+        chalk.blue(`development server listening at http://localhost:${PORT}`),
+      )
     }
   })
 }
 
 // 没构建过 dll 时先构建 dll，dll 构建完成之后再启动 devServer
-if (
-  !fs.existsSync(
-    paths.manifestDevPath
-  )
-) {
+if (!fs.existsSync(paths.manifestDevPath)) {
   console.info('building dll...')
   webpack(dllConfig, (err, stats) => {
     if (err) {
@@ -74,9 +73,8 @@ if (
     console.info('building dll finished')
     console.info()
     logStats(stats)
-    startDevServer()
+    startDevServer().then(() => console.log('启动完成'))
   })
-  return
+} else {
+  startDevServer().then(() => console.log('启动完成'))
 }
-
-startDevServer()

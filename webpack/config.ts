@@ -1,10 +1,11 @@
-const path = require('path')
+import path from 'path'
+import webpack from 'webpack'
 
-function getAbsolutePath(dir) {
+export function getAbsolutePath(dir: string): string {
   return path.resolve(__dirname, dir)
 }
 
-const paths = {
+export const paths = {
   indexHtml: getAbsolutePath('../src/index.html'),
   srcPath: getAbsolutePath('../src'),
   nodeModulePath: getAbsolutePath('../node_modules'),
@@ -22,7 +23,7 @@ const paths = {
   manifestDevPath: getAbsolutePath('../dist/dev/manifest.json'),
 }
 
-const statsConfig = {
+export const statsConfig: webpack.WebpackOptionsNormalized['stats'] = {
   // fallback value for stats options when an option is not defined (has precedence over local webpack defaults)
   all: undefined,
 
@@ -82,9 +83,6 @@ const statsConfig = {
   // Add the hash of the compilation
   hash: false,
 
-  // Set the maximum number of modules to be shown
-  maxModules: 15,
-
   // Add built modules information
   modules: false,
 
@@ -120,45 +118,33 @@ const statsConfig = {
   version: false,
 
   // Add warnings
-  warnings: false
+  warnings: false,
 }
 
-module.exports = {
-  paths,
+export const libModules = [
+  'lodash-es',
+  'react',
+  'react-dom',
+  'redux',
+  'classnames',
+  'prop-types',
+  'react-redux',
+  'redux-actions',
+  'react-router-dom',
+  'react-router',
+  'axios',
+  'styled-components',
+]
 
-  // 公共的库，被打包成 dll
-  libModules: [
-    'lodash-es',
-    'react',
-    'react-dom',
-    'redux',
-    'classnames',
-    'prop-types',
-    'react-redux',
-    'redux-actions',
-    'react-router-dom',
-    'react-router',
-    'axios',
-    'styled-components'
-  ],
+export const sourceMapForDev = 'cheap-source-map'
 
-  statsConfig,
-
-  sourceMapForDev: 'cheap-source-map', // 'cheap-module-eval-source-map'
-
-  logStats(stats) {
-    const {
-      time,
-      builtAt,
-      outputPath,
-      assets
-    } = stats.toJson(statsConfig)
-    console.info('time:', time)
-    console.info('builtAt:', builtAt)
-    console.info('outputPath:', outputPath)
-    console.info('assets:')
-    assets.forEach(({name, size}) => {
-      console.info(`${name}, size: ${size}`)
-    })
-  },
+export function logStats(stats: webpack.Stats): void {
+  const { time, builtAt, outputPath, assets } = stats.toJson(statsConfig)
+  console.info('time:', time)
+  console.info('builtAt:', builtAt)
+  console.info('outputPath:', outputPath)
+  console.info('assets:')
+  ;(assets as { name: string; size: string }[]).forEach(({ name, size }) => {
+    console.info(`${name}, size: ${size}`)
+  })
 }
